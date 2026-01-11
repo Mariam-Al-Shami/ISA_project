@@ -1,5 +1,3 @@
-
-
 public class State {
 
     public int[] board ;
@@ -26,11 +24,11 @@ public class State {
         for (int i = 14 ; i < 30 ; i++){
             board[i]= 0;  //empty
         }
+        // board[29]=1;
     }
 
     public State(State original){
         this.board = new int[30];
-
         for(int i=0 ; i<30 ;i++){
             this.board[i]=original.board[i];
         }
@@ -41,7 +39,6 @@ public class State {
 
     public int rollSticks() {
         int counter = 0; 
-
         for (int i = 0; i < 4; i++) {
          int stick = Math.random() < 0.5 ? 0 : 1;
          counter += stick;
@@ -92,4 +89,5 @@ public class State {
                       return " " + (index + 1); 
         }
     }
+    public int forcedPieceIndex = -1;
 }

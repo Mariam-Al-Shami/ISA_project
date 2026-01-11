@@ -1,5 +1,4 @@
 import java.util.Scanner;
-
 public class app
 {
 public static void main(String[ ] args){
@@ -20,6 +19,9 @@ public static void main(String[ ] args){
         } else if( input == 'C') {
             state.isBlackTurn = true; 
         }
+        else {
+            System.out.println("Invalid input");
+        }
         System.out.println("Start playing");
         System.out.println();
         while (!state.isWinner()) {
@@ -34,10 +36,19 @@ public static void main(String[ ] args){
 
             System.out.println(" ");
             System.out.println("Enter 'r' to roll");
-            char numOfMove = scanner.next().toUpperCase().charAt(0);
+            char r = scanner.next().toUpperCase().charAt(0);
             int roll= state.rollSticks();
             System.out.println(" Number of move = " + roll);
-         
+            if (!Move.canPlay(state, roll)) { 
+                System.out.println("No valid moves , enter 'S' to skip"); 
+                char skip = scanner.next().toUpperCase().charAt(0);
+                while (skip != 'S') {
+                    System.out.println("Invalid input, enter 'S' to skip");
+                    skip = scanner.next().toUpperCase().charAt(0);
+                }
+                state.isBlackTurn = !state.isBlackTurn; 
+                continue; 
+            }
             System.out.println("Enter number of peice to move : ");
         
             while (true) {
