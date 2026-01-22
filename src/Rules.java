@@ -1,109 +1,135 @@
-public class Rules {
+public class Rules { 
 
-    public static final int HOUSE_OF_HAPPINESS = 25; 
-    public static final int HOUSE_OF_WATER = 26;
-    public static final int HOUSE_OF_THREE = 27;
-    public static final int HOUSE_OF_RE_ATOUM = 28;
-    public static final int HOUSE_OF_HORUS = 29;
-    public static final int HOUSE_OF_REBIRTH = 14;
+    private static final int SQUARE_26 = SenetHouse.ROADBLOCK.getIndex();
+    private static final int SQUARE_27 = SenetHouse.RETURN_BOX.getIndex();
+    private static final int SQUARE_28 = SenetHouse.THREE_BOX.getIndex();
+    private static final int SQUARE_29 = SenetHouse.TWO_BOX.getIndex();
+    private static final int SQUARE_30 = SenetHouse.FREE_BOX.getIndex();
 
-    public static int applyAllRules(State state, int from, int to, int roll) {
-        if (!houseOfHappinessRule(from, to)) {
-            return from;
-        }
+    public static int RulesFunction(State state, int CurrentState, int NextState, int roll) {
 
-        if (to == HOUSE_OF_WATER) {
-            return houseOfWaterRule(state);
-        }
-        if (to == HOUSE_OF_THREE || from == HOUSE_OF_THREE) {
-            return houseOfThreeTruthsRule(state, from, to, roll);
-        }
-        if (to == HOUSE_OF_RE_ATOUM || from == HOUSE_OF_RE_ATOUM) {
-            return houseOfReAtoumRule(state, from, to, roll);
-        }
-        if (to == HOUSE_OF_HORUS) {
-            return houseOfHorusRule(state, roll);
+        if (!roadblockRule(state, CurrentState, NextState)) {
+            return CurrentState;
         }
 
-        return to;
+        if (NextState == SQUARE_27) {
+            return returnBoxRule(state);
+        }
+
+        if (NextState == SQUARE_28 || CurrentState == SQUARE_28) {
+            return threeBoxRule(state, CurrentState, NextState, roll);
+        }
+
+        if (NextState == SQUARE_29 || CurrentState == SQUARE_29) {
+            return twoBoxRule(state, CurrentState, NextState, roll);
+        }
+
+        if (NextState == SQUARE_30 || CurrentState == SQUARE_30) {
+            return freeBoxRule(state, CurrentState, NextState, roll);
+        }
+
+        return NextState;
     }
 
-    private static boolean houseOfHappinessRule(int from, int to) {
-        if (from < HOUSE_OF_HAPPINESS && to > HOUSE_OF_HAPPINESS) {
+    static boolean roadblockRule(State state, int CurrentState, int NextState) {
+        if (CurrentState < SQUARE_26 && NextState > SQUARE_26) {
+            if (!state.isSimulation)
+                System.out.println("Can't skip square 26");
             return false;
         }
         return true;
     }
 
-    private static int houseOfWaterRule(State state) {
-        System.out.println("Rule: Landed on Water (27) -> Return to Rebirth (15)");
-        return findNearestEmptyBeforeRebirth(state);
+    static int returnBoxRule(State state) {
+        if (!state.isSimulation)
+            System.out.println("Back to square 15");
+        return Find_Empty_Place(state);
     }
 
-    private static int houseOfThreeTruthsRule(State state, int from, int to, int roll) {
-        if (from != HOUSE_OF_THREE) {
-            return HOUSE_OF_THREE;
+    static int threeBoxRule(State state, int CurrentState, int NextState, int roll) {
+
+        if (CurrentState != SQUARE_28) {
+            return SQUARE_28;
         }
+
         if (roll == 3) {
-            return 30; 
-        } 
-        else {
-            System.out.println("Rule: Tried to move from 28 without a 3 -> Return to Rebirth");
-            return findNearestEmptyBeforeRebirth(state);
+            return 30; // خارج اللوحة
+        } else {
+            if (!state.isSimulation)
+                System.out.println("Back to square 15");
+            return Find_Empty_Place(state);
         }
     }
 
-    private static int houseOfReAtoumRule(State state, int from, int to, int roll) {
-        if (from != HOUSE_OF_RE_ATOUM) {
-            return HOUSE_OF_RE_ATOUM;
+    static int twoBoxRule(State state, int CurrentState, int NextState, int roll) {
+
+        if (CurrentState != SQUARE_29) {
+            return SQUARE_29;
         }
+
         if (roll == 2) {
-            return 30; 
-        } 
-        else {
-            System.out.println("Rule: Tried to move from 29 without a 2 -> Return to Rebirth");
-            return findNearestEmptyBeforeRebirth(state);
+            return 30;
+        } else {
+            if (!state.isSimulation)
+                System.out.println("Back to square 15");
+            return Find_Empty_Place(state);
         }
     }
 
-    private static int houseOfHorusRule(State state, int roll) {
+    static int freeBoxRule(State state, int CurrentState, int NextState, int roll) {
+
+        if (CurrentState != SQUARE_30) {
+            return SQUARE_30;
+        }
+
         return 30;
     }
 
-    public static int findNearestEmptyBeforeRebirth(State state) {
-        for (int i = HOUSE_OF_REBIRTH; i >= 0; i--) {
+    public static int Find_Empty_Place(State state) {
+        for (int i = SenetHouse.NEW_BEGINNING.getIndex(); i >= 0; i--) {
             if (state.board[i] == 0) {
                 return i;
             }
         }
-        return 0; 
+        return 0;
     }
 
-    public static void applyPenaltyIfNecessary(State state, int roll, int movedPieceIndex, int finalTo) {
-        int pieceVal = state.isBlackTurn ? 1 : 2;
-        if (state.forcedPieceIndex != -1 && movedPieceIndex != state.forcedPieceIndex) {
-            System.out.println("Penalty: Forced piece not moved!");
-            movePieceToRebirth(state, state.forcedPieceIndex, pieceVal);
-            state.forcedPieceIndex = -1; 
+    public static void Apply_Penalty(State state, int roll, int movedState, int finalNextState) {
+
+        int player = state.isBlackTurn ? 1 : 2;
+
+        if (state.after_penalty != -1 && movedState != state.after_penalty) {
+            if (!state.isSimulation)
+                System.out.println("Penalty: This piece not moved");
+            Back_TO_15(state, state.after_penalty, player);
+            state.after_penalty = -1;
         }
-        if (state.board[HOUSE_OF_HORUS] == pieceVal && movedPieceIndex != HOUSE_OF_HORUS && finalTo != HOUSE_OF_HORUS) {
-            System.out.println("Penalty: You must move the piece on House of Horus (30)!");
-            movePieceToRebirth(state, HOUSE_OF_HORUS, pieceVal);
+
+        if (state.board[SQUARE_28] == player && movedState != SQUARE_28 && finalNextState != SQUARE_28) {
+            if (!state.isSimulation)
+                System.out.println("Penalty: Piece on square 28 must move");
+            Back_TO_15(state, SQUARE_28, player);
         }
-        if (state.board[HOUSE_OF_THREE] == pieceVal && movedPieceIndex != HOUSE_OF_THREE && finalTo != HOUSE_OF_THREE) {
-            System.out.println("Penalty: Piece on 28 must move or return to Rebirth!");
-            movePieceToRebirth(state, HOUSE_OF_THREE, pieceVal);
+
+        if (state.board[SQUARE_29] == player && movedState != SQUARE_29 && finalNextState != SQUARE_29) {
+            if (!state.isSimulation)
+                System.out.println("Penalty: Piece on square 29 must move");
+            Back_TO_15(state, SQUARE_29, player);
         }
-        if (state.board[HOUSE_OF_RE_ATOUM] == pieceVal && movedPieceIndex != HOUSE_OF_RE_ATOUM && finalTo != HOUSE_OF_RE_ATOUM) {
-            System.out.println("Penalty: Piece on 29 must move or return to Rebirth!");
-            movePieceToRebirth(state, HOUSE_OF_RE_ATOUM, pieceVal);
+
+        if (state.board[SQUARE_30] == player && movedState != SQUARE_30 && finalNextState != SQUARE_30) {
+            if (!state.isSimulation)
+                System.out.println("Penalty: Piece on square 30 must move");
+            Back_TO_15(state, SQUARE_30, player);
         }
     }
-    
-    public static void movePieceToRebirth(State state, int pieceIndex, int pieceVal) {
-        int safeSpot = findNearestEmptyBeforeRebirth(state);
-        state.board[pieceIndex] = 0; 
-        state.board[safeSpot] = pieceVal; 
-        System.out.println("Piece returned to square: " + (safeSpot + 1));
+
+    public static void Back_TO_15(State state, int Index, int Value) {
+        int empty = Find_Empty_Place(state);
+        state.board[Index] = 0;
+        state.board[empty] = Value;
+
+        if (!state.isSimulation)
+            System.out.println("Back to square: " + (empty + 1));
     }
 }

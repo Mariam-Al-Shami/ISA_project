@@ -1,25 +1,24 @@
 public class Move {
 
     public static boolean canMove(State state, int from, int roll) {
-        int peice = state.board[from];
+
+        int pawn = state.board[from];
         int to = from + roll;
 
-        if (peice == 0) {
+        if (pawn == 0) return false;
+        if (state.isBlackTurn && pawn != 1) 
             return false;
-        }
-        if (state.isBlackTurn && peice != 1) {
+        if (!state.isBlackTurn && pawn != 2) 
             return false;
-        }
-        if (!state.isBlackTurn && peice != 2) {
-            return false;
-        }
-        if (to < 30 && state.board[to] == peice) {
-            return false;
-        }
-        int finalDest = Rules.applyAllRules(state, from, to, roll);
 
-        if (finalDest == from && to != from) {
-            System.err.println("Move not allowed special rules");
+        if (to < 30 && state.board[to] == pawn) 
+            return false;
+
+        int final_destination = Rules.RulesFunction(state, from, to, roll);
+
+        if (final_destination == from && to != from) {
+            if (!state.isSimulation)
+                System.err.println("Move not allowed special rules");
             return false;
         }
 
@@ -27,51 +26,46 @@ public class Move {
     }
 
     public static void updateBoard(State state, int from, int roll) {
-      
-
-        int peice = state.board[from];
+        int pawn = state.board[from];
         int to = from + roll;
-        to = Rules.applyAllRules(state, from, to, roll);
+
+        to = Rules.RulesFunction(state, from, to, roll);
 
         if (to >= 30) {
-            if (peice == 1) {
+            state.board[from] = 0;
+            if (pawn == 1)
                 state.blackOut++;
-                state.board[from] = 0;
-            } else {
+            else 
                 state.whiteOut++;
-                state.board[from] = 0;
-            }
-        } else {
-            if (state.board[to] != peice) {
+        } 
+        else {
+            if (state.board[to] != pawn) {
                 int opponent = state.board[to];
-                state.board[to] = peice;
+                state.board[to] = pawn;
                 state.board[from] = opponent;
-            } else {
-                state.board[to] = peice;
+            } 
+            else {
+                state.board[to] = pawn;
                 state.board[from] = 0;
             }
         }
 
-        Rules.applyPenaltyIfNecessary(state, roll, from, to);
-        state.isBlackTurn = !state.isBlackTurn;
-        System.out.println("\nBoard after move:");
-        state.printBoard();
+        if (!state.isSimulation) {
+            Rules.Apply_Penalty(state, roll, from, to);
+            state.isBlackTurn = !state.isBlackTurn;
+            System.out.println("\nBoard after move:");
+            state.printBoard();
+        }
     }
 
     public static boolean canPlay(State state, int roll) {
-    for (int i = 0; i < 30; i++) {
-        int piece = state.board[i];
-        if (piece == 0) 
-            continue;
-        if (state.isBlackTurn && piece != 1) 
-            continue;
-        if (!state.isBlackTurn && piece != 2) 
-            continue;
-        if (canMove(state, i, roll)) {
-            return true;
+        for (int i = 0; i < 30; i++) {
+            int pawn = state.board[i];
+            if (pawn == 0) continue;
+            if (state.isBlackTurn && pawn != 1) continue;
+            if (!state.isBlackTurn && pawn != 2) continue;
+            if (canMove(state, i, roll)) return true;
         }
+        return false;
     }
-    return false;
-}
-
 }
