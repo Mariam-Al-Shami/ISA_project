@@ -24,7 +24,7 @@ public class app {
 
         System.out.print("Enable debug mode? (Y/N): ");
         char debug = scanner.next().toUpperCase().charAt(0);
-        Expectiminimax.debugMode = (debug == 'Y');
+        Expectiminimax.debug = (debug == 'Y');
 
         System.out.println("====================");
         System.out.print("Choose start playing : (C) Computer OR (H) Human ? ");

@@ -107,40 +107,11 @@ public class State {
         }
     }
 
-    public void applyMove(int from, int roll) {
-        int pawn = board[from];
-        int to = from + roll;
-
-        to = Rules.RulesFunction(this, from, to, roll);
-        if (to >= 30) {
-            board[from] = 0;
-            if (pawn == 1) 
-                blackOut++;
-            else 
-                whiteOut++;
-        } 
-        else {
-            if (board[to] != 0 && board[to] != pawn) {
-                int opponent = board[to];
-                board[to] = pawn;
-                board[from] = opponent;
-            }
-            else {
-                board[to] = pawn;
-                board[from] = 0;
-            }
-        }
-        Rules.Apply_Penalty(this, roll, from, to);
-        isBlackTurn = !isBlackTurn;
-    }
-
     public List<State> getAllNextStates(int roll) {
         List<State> next_states = new ArrayList<>();
         int player = isBlackTurn ? 1 : 2;
-
         boolean old_simulation = this.isSimulation;
         this.isSimulation = true;
-
         int forced = -1;
         if (board[SenetHouse.FREE_BOX.getIndex()] == player)
             forced = SenetHouse.FREE_BOX.getIndex();
@@ -148,28 +119,24 @@ public class State {
             forced = SenetHouse.THREE_BOX.getIndex();
         if (board[SenetHouse.TWO_BOX.getIndex()] == player)
             forced = SenetHouse.TWO_BOX.getIndex();
-
         if (forced != -1) {
             if (Move.canMove(this, forced, roll)) {
                 State new_state = new State(this);
                 new_state.isSimulation = true;
-                new_state.applyMove(forced, roll);
+                Move.updateBoard(new_state, forced, roll);
                 next_states.add(new_state);
             }
             this.isSimulation = old_simulation;
             return next_states;
         }
-
         for (int i = 0; i < 30; i++) {
             if (board[i] != player) continue;
             if (!Move.canMove(this, i, roll)) continue;
-
-            State ns = new State(this);
-            ns.isSimulation = true;
-            ns.applyMove(i, roll);
-            next_states.add(ns);
+            State new_state = new State(this);
+            new_state.isSimulation = true;
+            Move.updateBoard(new_state, i, roll);
+            next_states.add(new_state);
         }
-
         this.isSimulation = old_simulation;
         return next_states;
     }

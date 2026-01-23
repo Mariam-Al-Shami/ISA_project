@@ -1,15 +1,15 @@
 public class Heuristic {
 
     public static int evaluate(State state) {
-
+        
         int score = 0;
         score += (state.blackOut - state.whiteOut) * 500;
-
+        
         for (int i = 0; i < 30; i++) {
             if (state.board[i] == 1) score += i * 5;
             if (state.board[i] == 2) score -= i * 5;
         }
-
+        
         if (state.board[SenetHouse.ROADBLOCK.getIndex()] == 1) 
             score += 40;
         if (state.board[SenetHouse.ROADBLOCK.getIndex()] == 2) 
@@ -45,7 +45,7 @@ public class Heuristic {
 
         for (int roll = 1; roll <= 5; roll++) {
             double probability = Probabilities.getRollProbability(roll);
-            if (probability == 0) 
+            if (probability == 0)
                 continue;
             State state_black = new State(state);
             state_black.isBlackTurn = true;

@@ -43,16 +43,15 @@ public class Move {
                 int opponent = state.board[to];
                 state.board[to] = pawn;
                 state.board[from] = opponent;
-            } 
+            }  
             else {
                 state.board[to] = pawn;
                 state.board[from] = 0;
             }
         }
-
-        if (!state.isSimulation) {
             Rules.Apply_Penalty(state, roll, from, to);
             state.isBlackTurn = !state.isBlackTurn;
+            if (!state.isSimulation) {
             System.out.println("\nBoard after move:");
             state.printBoard();
         }
