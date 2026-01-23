@@ -9,28 +9,27 @@ public class State {
     public boolean isBlackTurn;
     public boolean isSimulation = false;
     public int after_penalty = -1;
-    public int forcedPieceIndex = -1;
 
     public State() {
         this.board = new int[30];
-        this.blackOut = 6;
+        this.blackOut = 0;
         this.whiteOut = 0;
         this.isBlackTurn = true;
         initialBorad();
     }
 
     private void initialBorad() {
-        // for (int i = 0; i < 14; i++) {
-        //     if (i % 2 == 0) {
-        //         board[i] = 1; // black
-        //     } else {
-        //         board[i] = 2; // white
-        //     }
-        // }
+        for (int i = 0; i < 14; i++) {
+            if (i % 2 == 0) {
+                board[i] = 1; // black
+            } else {
+                board[i] = 2; // white
+            }
+        }
         for (int i = 14; i < 30; i++) {
             board[i] = 0;  // empty
         }
-         board[29]=1;
+        //  board[29]=1;
     }
 
     public State(State original) {
